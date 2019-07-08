@@ -3,7 +3,7 @@ const {ROLES, ACTION} = require('../constants');
 const {ForbiddenError} = require('../errors')
 
 /**
- * @param()
+ * @param {} action
  * */
 function checkAccess(actorRole, objRole, action, isToSelf = false) {
     return isToSelf ?

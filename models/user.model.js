@@ -1,15 +1,15 @@
 const mongoose = require('mongoose');
-const {ROLES, GENDER} =require('../utils/constants');
+const {ROLES, GENDER, REGEXP} = require('../utils/constants');
+
+const nameSchema = {
+    type: String,
+    required: true,
+    match: REGEXP.name,
+};
 
 const Schema = new mongoose.Schema({
-    firstName: {
-        type: String,
-        required: true,
-        minLength: 1,
-        maxLength: 20,
-        match: /[A-Z][a-z]*/
-    },
-    lastName: {},
+    firstName: nameSchema,
+    lastName: nameSchema,
     email: {
         type: String,
         minLength: 3,
