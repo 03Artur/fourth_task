@@ -12,4 +12,4 @@ class ApplicationError extends Error {
     }
 }
 
-model.exports = ApplicationError;
+module.exports = ApplicationError;
