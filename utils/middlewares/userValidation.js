@@ -1,5 +1,6 @@
 const yup = require('yup');
-const {ROLES, GENDER} = require('../constants')
+const {ROLES, GENDER, REGEXP} = require('../constants');
+const {BadRequestError} = require('../errors');
 
 const createUserSchema = yup.object({
 
@@ -19,15 +20,15 @@ const createUserSchema = yup.object({
     password: yup
         .string()
         .required()
-        .matches(/[A-Za-z0-9]{8,100}/),
+        .matches(REGEXP.password),
     gender: yup.string()
         .required()
         .oneOf(Object.values(GENDER)),
     role: yup.string()
         .required()
         .oneOf(Object.values(ROLES)),
-});
 
+});
 const updateUserSchema = yup.object({
 
     firstName: yup
@@ -43,23 +44,43 @@ const updateUserSchema = yup.object({
         .email(),
     password: yup
         .string()
-        .matches(/[A-Za-z0-9]{8,100}/),
+        .matches(REGEXP.password),
     gender: yup.string()
         .oneOf(Object.values(GENDER)),
     role: yup.string()
         .oneOf(Object.values(ROLES)),
+
 });
 
-const userValidation = async (req, res, next) => {
+const createUserValidation = async (req, res, next) => {
     try {
-        const user = req.body;
-        await updateUserSchema.isValid(user);
-        res.end();
+
+        if (await createUserSchema.isValid(req.body)) {
+            next();
+        } else {
+            next(new BadRequestError());
+        }
+    } catch (e) {
+        next(e);
+    }
+};
+
+const updateUserValidation = async (req, res, next) => {
+    try {
+
+        if (await updateUserSchema.isValid(req.body)) {
+            next();
+        } else {
+            next(new BadRequestError());
+        }
     } catch (e) {
         next(e);
     }
 
 };
 
-module.exports = userValidation;
+module.exports = {
+    createUserValidation,
+    updateUserValidation,
+};
 
