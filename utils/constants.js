@@ -8,6 +8,15 @@ const ROLES = {
 /**
  * @enum {string}
  * */
+const URL = {
+    DB: 'mongodb://localhost/',
+};
+const PORT = process.env.PORT || 3000;
+
+
+/**
+ * @enum {string}
+ * */
 const GENDER = {
     MALE: 'MALE',
     FEMALE: 'FEMALE',
@@ -23,13 +32,14 @@ const ACTION = {
     DELETE: 'DELETE',
 };
 
+const DBNAME = 'developer_db';
+
 const REGEXP = {
     name: /^[A-Z][a-z]*$/,
     password: /(?!.*?\s)(?=.*?[a-z])(?=.*[A-Z])(?=.*?[0-9])(?=^\w{8,100}$)/,
     email: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
 };
 
-const SALT = 'This_is_the_best_salt_of_the_whole_word';
 const SALT_ROUND = 10;
 
 module.exports = {
@@ -37,6 +47,8 @@ module.exports = {
     GENDER,
     ACTION,
     REGEXP,
-    SALT,
     SALT_ROUND,
+    URL,
+    DBNAME,
+    PORT,
 };

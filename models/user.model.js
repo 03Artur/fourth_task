@@ -12,11 +12,9 @@ const Schema = new mongoose.Schema({
     lastName: nameSchema,
     email: {
         type: String,
-        minLength: 3,
-        maxLength: 254,
         unique: true,
         required: true,
-
+        match: REGEXP.email,
     },
     password: {
         type: String,

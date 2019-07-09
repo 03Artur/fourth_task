@@ -5,34 +5,30 @@ const User = require('../../models/user.model');
 
 /**
  *
- *Checks access rights
- *
- * @param {ACTION} action - type of action
- * @param {ROLES} actorRole - access role of actor
- * @param {ROLES} objRole - access role of object
- * @param {boolean} isToSelf - is an action on oneself
+ * @param actionType{ACTION}
+ * @param actorRole{ROLES}
+ * @param objRole{ROLES}
+ * @param isToSelf{boolean}
  * @returns {boolean}
- * */
-function checkAccessToSelf(action, actorRole) {
-    return CRUD_ROLES_RULES.get(actorRole).get(action).toSelf;
+ */
+function checkAccess(actionType, actorRole, objRole, isToSelf = false) {
+    ;
+
+    return isToSelf ?
+        CRUD_ROLES_RULES.get(actorRole).get(actionType).toSelf :
+        CRUD_ROLES_RULES.get(actorRole).get(actionType).toOther.includes(objRole);
 }
 
 /**
  *
- * @param{ACTION} action
- * @param{ROLES} actorRole
- * @param{ROLES} objRole
- * @returns {boolean}
+ * @param req
+ * @param res
+ * @param next
  */
-function checkAccessToOther(action, actorRole, objRole) {
-    console.log("3");
-
-    return (CRUD_ROLES_RULES.get(actorRole).get(action).toOther.includes(objRole));
-}
-
 function createUserCheckAccess(req, res, next) {
     try {
-        if (checkAccessToOther(ACTION.CREATE, req.headers.role, req.body.role)) {
+        ;
+        if (checkAccess(ACTION.CREATE, req.headers.role, req.body.role)) {
             next();
         } else {
             next(new ForbiddenError());
@@ -50,25 +46,22 @@ function createUserCheckAccess(req, res, next) {
  * @returns function
  * */
 function readUpdateDeleteUserCheckAccess(actionType) {
-
-    const checkActionAccess = async (req, res, next) => {
+    return async (req, res, next) => {
         try {
             const user = await User.findById(req.params.id);
-
-            if ((req.headers.id === user.id ?
-                checkAccessToSelf(actionType, req.headers.role) :
-                checkAccessToOther(actionType, req.headers.role, user.role))) {
+            if (!user) {
+                next(new NotFoundError())
+            }
+            else if (checkAccess(actionType, req.headers.role, user.role, req.headers.id === user.id)) {
                 next();
             } else {
                 next(new ForbiddenError());
             }
 
-        } catch
-            (e) {
-            next(e)
+        } catch (e) {
+            next(new NotFoundError())
         }
     };
-    return checkActionAccess;
 }
 
 module.exports = {

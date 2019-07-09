@@ -2,60 +2,39 @@ const yup = require('yup');
 const {ROLES, GENDER, REGEXP} = require('../constants');
 const {BadRequestError} = require('../errors');
 
-const createUserSchema = yup.object({
+const nameRule = yup.string().min(1).max(20);
+const emailRule = yup.string().email();
+const passwordRule = yup.string().matches(REGEXP.password);
+const genderRule = yup.string().oneOf(Object.values(GENDER));
+const roleRule = yup.string().oneOf(Object.values(ROLES));
 
-    firstName: yup
-        .string()
-        .required()
-        .min(1)
-        .max(20),
-    lastName: yup
-        .string()
-        .required()
-        .min(1)
-        .max(20),
-    email: yup
-        .string()
-        .email(),
-    password: yup
-        .string()
-        .required()
-        .matches(REGEXP.password),
-    gender: yup.string()
-        .required()
-        .oneOf(Object.values(GENDER)),
-    role: yup.string()
-        .required()
-        .oneOf(Object.values(ROLES)),
+const validationSchemas = {
+    post:  yup.object({
+        firstName: nameRule.required(),
+        lastName: nameRule.required(),
+        email: emailRule.required(),
+        password: passwordRule.required(),
+        gender: genderRule.required(),
+        role: roleRule.required(),
+    }),
+    put:yup.object({
+        firstName: nameRule,
+        lastName: nameRule,
+        email: emailRule,
+        password: passwordRule,
+        gender: genderRule,
+        role: roleRule,
+    })
+};
+function isEmpty(obj) {
+    return Object.keys(obj).length === 0;
+}
 
-});
-const updateUserSchema = yup.object({
 
-    firstName: yup
-        .string()
-        .min(1)
-        .max(20),
-    lastName: yup
-        .string()
-        .min(1)
-        .max(20),
-    email: yup
-        .string()
-        .email(),
-    password: yup
-        .string()
-        .matches(REGEXP.password),
-    gender: yup.string()
-        .oneOf(Object.values(GENDER)),
-    role: yup.string()
-        .oneOf(Object.values(ROLES)),
-
-});
-
-const createUserValidation = async (req, res, next) => {
+const userValidation = async (req, res, next) => {
     try {
 
-        if (await createUserSchema.isValid(req.body)) {
+        if (await validationSchemas[req.method.toLowerCase()].isValid(req.body) && !isEmpty(req.body)) {
             next();
         } else {
             next(new BadRequestError());
@@ -65,22 +44,8 @@ const createUserValidation = async (req, res, next) => {
     }
 };
 
-const updateUserValidation = async (req, res, next) => {
-    try {
-
-        if (await updateUserSchema.isValid(req.body)) {
-            next();
-        } else {
-            next(new BadRequestError());
-        }
-    } catch (e) {
-        next(e);
-    }
-
-};
 
 module.exports = {
-    createUserValidation,
-    updateUserValidation,
+    userValidation,
 };
 
